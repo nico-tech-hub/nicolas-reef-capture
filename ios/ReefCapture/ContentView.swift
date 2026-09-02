@@ -119,15 +119,47 @@ struct ContentView: View {
     private func deleteObservation(_ observation: ReefObservation) async {
         let serverId = observation.serverId
         let path = observation.localFilePath
+        let shortId = String(observation.id.uuidString.prefix(8)).uppercased()
         modelContext.delete(observation)
         try? modelContext.save()
         photoStore.delete(at: path)
 
         if let serverId {
+            // #region agent log
+            debugAgentLog(hypothesisId: "F", location: "ContentView.swift:deleteObservation", message: "iOS local delete then DELETE /photos", data: ["shortId": shortId, "hasServerId": true, "serverId": serverId])
+            // #endregion
             try? await api.deletePhoto(serverId: serverId)
+        } else {
+            // #region agent log
+            debugAgentLog(hypothesisId: "G", location: "ContentView.swift:deleteObservation", message: "iOS local delete skipped server (no serverId)", data: ["shortId": shortId, "hasServerId": false])
+            // #endregion
         }
     }
 }
+
+// #region agent log
+func debugAgentLog(hypothesisId: String, location: String, message: String, data: [String: Any]) {
+    let payload: [String: Any] = [
+        "sessionId": "fcb216",
+        "hypothesisId": hypothesisId,
+        "location": location,
+        "message": message,
+        "data": data,
+        "timestamp": Int(Date().timeIntervalSince1970 * 1000),
+    ]
+    guard let json = try? JSONSerialization.data(withJSONObject: payload),
+          var line = String(data: json, encoding: .utf8) else { return }
+    line += "\n"
+    let url = URL(fileURLWithPath: "/Users/nicolasfarolfi/Documents/ReefCapture/.cursor/debug-fcb216.log")
+    if !FileManager.default.fileExists(atPath: url.path) {
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+    }
+    guard let handle = try? FileHandle(forWritingTo: url) else { return }
+    defer { try? handle.close() }
+    try? handle.seekToEnd()
+    try? handle.write(contentsOf: Data(line.utf8))
+}
+// #endregion
 
 /// preview for the app
 #Preview {

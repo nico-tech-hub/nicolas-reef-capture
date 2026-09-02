@@ -101,6 +101,9 @@ export class PhotosController {
   @Delete(':id')
   @HttpCode(204)
   remove(@Param('id') id: string, @Req() request: { user: AuthUser }) {
+    // #region agent log
+    fetch('http://127.0.0.1:7478/ingest/fe2a4c94-3c3b-4f91-918b-5c7958b7958d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fcb216'},body:JSON.stringify({sessionId:'fcb216',hypothesisId:'F',location:'photos.controller.ts:remove',message:'DELETE /photos reached backend',data:{id,role:request.user.role},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     this.photosService.remove(id, request.user); // delete the photo and return the photo id and job id   
   }
 }

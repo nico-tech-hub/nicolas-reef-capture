@@ -108,6 +108,9 @@ final class ReefCaptureAPI: PhotoUploading {
         guard let http = response as? HTTPURLResponse else {
             throw UploadError.network
         }
+        // #region agent log
+        debugAgentLog(hypothesisId: "F", location: "ReefCaptureAPI.swift:deletePhoto", message: "DELETE /photos HTTP status", data: ["status": http.statusCode, "serverId": serverId])
+        // #endregion
         if http.statusCode == 404 {
             return
         }
