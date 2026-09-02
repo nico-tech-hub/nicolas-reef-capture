@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/auth': 'http://127.0.0.1:3000',
       '/photos': 'http://127.0.0.1:3000',
+      '/jobs': 'http://127.0.0.1:3000',
     },
   },
 });

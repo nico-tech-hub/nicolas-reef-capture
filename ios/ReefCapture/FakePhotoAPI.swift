@@ -1,6 +1,6 @@
 import Foundation // for Foundation types like String, Int, etc.
 
-/// Mocks the NestJS API 
+/// Mocks the NestJS API
 /// The 1-second delay is intentional: to see UPLOADING in the UI.
 struct FakePhotoAPI: PhotoUploading {
     let delayNanoseconds: UInt64 // the delay in nanoseconds
@@ -15,9 +15,23 @@ struct FakePhotoAPI: PhotoUploading {
         if delayNanoseconds > 0 {
             try await Task.sleep(nanoseconds: delayNanoseconds)
         }
-        return UploadResponse(  // return the upload response
-            serverId: "srv-\(String(idempotencyKey.uuidString.prefix(8)))", // the server id is a prefix of the idempotency key
-            jobId: nil
+        let prefix = String(idempotencyKey.uuidString.prefix(8))
+        return UploadResponse(
+            serverId: "srv-\(prefix)",
+            jobId: "job-\(prefix)"
         )
     }
+
+    /// Preview/tests skip the 5s fake AI delay and complete immediately.
+    func fetchJobStatus(jobId: String) async throws -> JobStatus {
+        JobStatus(
+            jobId: jobId,
+            status: "COMPLETED",
+            classification: "healthy_coral",
+            confidence: 0.92
+        )
+    }
+
+    /// Preview/tests: remote delete is a no-op success.
+    func deletePhoto(serverId: String) async throws {}
 }

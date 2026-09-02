@@ -24,6 +24,8 @@ const conflictMessage = ref('');
 const actionError = ref('');
 
 const selected = computed(() => photos.value.find((photo) => photo.id === selectedId.value) ?? null);
+const isProcessing = computed(() => selected.value?.processingStatus === 'PROCESSING');
+let pollTimer: ReturnType<typeof setInterval> | undefined;
 
 async function submitLogin() {
   loginError.value = '';
@@ -40,20 +42,43 @@ async function submitLogin() {
 }
 
 function logout() {
+  stopPolling();
   clearToken();
   loggedIn.value = false;
   photos.value = [];
   selectedId.value = null;
 }
 
-async function refresh() {
-  actionError.value = '';
-  conflictMessage.value = '';
+async function refresh(options?: { silent?: boolean }) {
+  if (!options?.silent) {
+    actionError.value = '';
+    conflictMessage.value = '';
+  }
   photos.value = await listPhotos();
   if (!selectedId.value && photos.value[0]) {
     selectedId.value = photos.value[0].id;
   } else if (selectedId.value && !photos.value.some((photo) => photo.id === selectedId.value)) {
     selectedId.value = photos.value[0]?.id ?? null;
+  }
+  syncPolling();
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = undefined;
+  }
+}
+
+function syncPolling() {
+  const busy = photos.value.some((photo) => photo.processingStatus === 'PROCESSING');
+  if (busy && !pollTimer) {
+    pollTimer = setInterval(() => {
+      void refresh({ silent: true });
+    }, 1500);
+  }
+  if (!busy) {
+    stopPolling();
   }
 }
 
@@ -95,6 +120,7 @@ async function retry() {
   conflictMessage.value = '';
   try {
     replacePhoto(await retryPhoto(selected.value.id));
+    syncPolling();
   } catch (error) {
     actionError.value = (error as Error).message;
   }
@@ -133,6 +159,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  stopPolling();
   if (imageUrl.value) {
     URL.revokeObjectURL(imageUrl.value);
   }
@@ -206,8 +233,12 @@ onBeforeUnmount(() => {
           <div v-else class="photo-fallback">No preview</div>
           <dl>
             <div>
+              <dt>Processing</dt>
+              <dd>{{ selected.processingStatus }}</dd>
+            </div>
+            <div>
               <dt>Classification</dt>
-              <dd>{{ selected.classification ?? '—' }}</dd>
+              <dd>{{ selected.classification ?? (isProcessing ? 'waiting for job…' : '—') }}</dd>
             </div>
             <div>
               <dt>Confidence</dt>
@@ -228,9 +259,9 @@ onBeforeUnmount(() => {
         <p v-if="actionError" class="error">{{ actionError }}</p>
 
         <div class="actions">
-          <button type="button" @click="approve">Approve</button>
-          <button type="button" class="danger" @click="reject">Reject</button>
-          <button type="button" class="ghost" @click="retry">Retry</button>
+          <button type="button" :disabled="isProcessing" @click="approve">Approve</button>
+          <button type="button" class="danger" :disabled="isProcessing" @click="reject">Reject</button>
+          <button type="button" class="ghost" :disabled="isProcessing" @click="retry">Retry</button>
         </div>
       </section>
     </template>

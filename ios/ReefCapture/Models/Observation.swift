@@ -21,7 +21,7 @@ enum ProcessingStatus: String, Codable {
 
 /// Model for the observation, using SwiftData
 @Model
-final class Observation { // final class for the observation, avoiding inheritance
+final class ReefObservation { // named ReefObservation: @Model cannot use Observation (clashes with Swift Observation)
     var id: UUID
     var localFilePath: String
     var createdAt: Date

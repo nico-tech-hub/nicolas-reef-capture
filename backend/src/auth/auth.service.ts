@@ -2,16 +2,21 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { USERS } from './users';
 
+
 export type AuthUser = {
-  sub: string;
-  email: string;
-  role: 'diver' | 'scientist';
+  sub: string; // subject for the JWT token, we use user.id 
+  email: string; // email
+  role: 'diver' | 'scientist'; // role
 };
 
+/// objective: authenticate the user
+/// return the access token
+/// if the credentials are invalid, throw a UnauthorizedException
 @Injectable()
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
+  /// POST - login
   login(email: string, password: string): { accessToken: string } {
     const user = USERS.find((candidate) => candidate.email === email && candidate.password === password);
     if (!user) {

@@ -11,7 +11,7 @@ struct ContentView: View {
 
     var api: any PhotoUploading = FakePhotoAPI() // API to use for the app, using the FakePhotoAPI or real API ReefCaptureAPI
     @Environment(\.modelContext) private var modelContext // environment context for the app
-    @Query(sort: \Observation.createdAt, order: .reverse) private var observations: [Observation] // observations sorted by creation date in reverse order
+    @Query(sort: \ReefObservation.createdAt, order: .reverse) private var observations: [ReefObservation] // observations sorted by creation date in reverse order
 
     /// This view owns the picker selection. `$selectedItem` is a Binding passed to PhotosPicker.
     @State private var selectedItem: PhotosPickerItem? // selected item for the picker
@@ -31,39 +31,42 @@ struct ContentView: View {
                         description: Text("Tap Select Photo to save a reef observation locally.")
                     )
                 } else { // if there are observations, show the list of observations
-                    List(observations) { observation in
-                        ObservationRow(
-                            observation: observation,
-                            image: photoStore.loadImage(at: observation.localFilePath),
-                            onRetry: {
-                                Task { await ensureQueue().retry(observation) }
-                            }
-                        )
+                    List {
+                        ForEach(observations) { observation in
+                            ObservationRow(
+                                observation: observation,
+                                image: photoStore.loadImage(at: observation.localFilePath),
+                                onRetry: {
+                                    Task { await ensureQueue().retry(observation) }
+                                }
+                            )
+                        }
+                        .onDelete(perform: deleteObservations)
                     }
                 }
             }
             .navigationTitle("ReefCapture") // navigation title for the app
             .toolbar { // toolbar for the app
                 ToolbarItem(placement: .primaryAction) { // primary action for the toolbar
-                    PhotosPicker( // picker 
-                        "Select Photo", 
-                        selection: $selectedItem, /
-                        matching: .images 
+                    PhotosPicker(
+                        "Select Photo",
+                        selection: $selectedItem,
+                        matching: .images
                     )
                 }
             } 
             .onChange(of: selectedItem) { _, newItem in
-                guard let newItem else { return }
+                guard let newItem else { return } // return if the new item is nil
                 Task {
-                    await importPhoto(newItem)
-                    selectedItem = nil
+                    await importPhoto(newItem) // import the photo
+                    selectedItem = nil // set the selected item to nil
                 }
             }
             .task {
-                await ensureQueue().start()
+                await ensureQueue().start() // start the queue
             }
             .alert("Could not import photo", isPresented: $importFailed) {
-                Button("OK", role: .cancel) {}
+                Button("OK", role: .cancel) {} // button to close the alert
             }
         }
     } // end of body
@@ -84,16 +87,16 @@ struct ContentView: View {
     @MainActor
     private func importPhoto(_ item: PhotosPickerItem) async {
         do { // try to import the photo
-            guard let rawData = try await item.loadTransferable(type: Data.self),   
-                  let jpeg = photoStore.jpegData(from: rawData) else {
-                importFailed = true
-                return
+            guard let rawData = try await item.loadTransferable(type: Data.self),    // load the transferable data from the item
+                let jpeg = photoStore.jpegData(from: rawData) else { // convert the data to a JPEG, returns the JPEG data
+                    importFailed = true // set the import failed flag to true
+                    return // return if the data is not valid
             }
 
             let id = UUID() // create a new UUID for the observation
-            let path = try photoStore.save(jpeg, id: id) // save the photo to the photo store
-            let observation = Observation(id: id, localFilePath: path) // create the observation
-            modelContext.insert(observation)   // insert the observation into the model context
+            let path = try photoStore.save(jpeg, id: id) // save the photo to the photo store, returns the path to the photo
+            let observation = ReefObservation(id: id, localFilePath: path) // create the observation, with the id and the path to the photo
+            modelContext.insert(observation)   // insert the observation into the model context, this is a SwiftData operation
 
             // Do not await the drain: the UI must stay responsive.
             Task { await ensureQueue().processPending() }
@@ -101,10 +104,33 @@ struct ContentView: View {
             importFailed = true
         }
     }
+
+    /// Swipe-to-delete: always drop the local row + JPEG first (user intent).
+    /// Then best-effort DELETE /photos/:id. A network failure must not resurrect the row.
+    @MainActor
+    private func deleteObservations(at offsets: IndexSet) {
+        let items = offsets.map { observations[$0] }
+        for observation in items {
+            Task { await deleteObservation(observation) }
+        }
+    }
+
+    @MainActor
+    private func deleteObservation(_ observation: ReefObservation) async {
+        let serverId = observation.serverId
+        let path = observation.localFilePath
+        modelContext.delete(observation)
+        try? modelContext.save()
+        photoStore.delete(at: path)
+
+        if let serverId {
+            try? await api.deletePhoto(serverId: serverId)
+        }
+    }
 }
 
 /// preview for the app
 #Preview {
     ContentView(api: FakePhotoAPI(delayNanoseconds: 0))
-        .modelContainer(for: Observation.self, inMemory: true)
+        .modelContainer(for: ReefObservation.self, inMemory: true)
 }

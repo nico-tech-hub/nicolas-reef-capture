@@ -7,6 +7,6 @@ struct ReefCaptureApp: App { // main app struct
         WindowGroup { // defines the window group for the app
             ContentView(api: ReefCaptureAPI()) // provides the content view for the app, build the HTTP client
         }
-        .modelContainer(for: Observation.self) // provides the model container for the app
+        .modelContainer(for: ReefObservation.self) // provides the model container for the app
     }
 } // end of ReefCaptureApp struct

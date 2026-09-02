@@ -1,0 +1,4 @@
+{"data":{"hasItem":"true"},"hypothesisId":"H1","timestamp":1788266941559,"location":"ContentView.swift:onChange(selectedItem)","runId":"post-fix","message":"PhotosPicker selection changed","sessionId":"cbbe69"}
+{"data":{"hasItem":"false"},"hypothesisId":"H1","timestamp":1788266945540,"location":"ContentView.swift:onChange(selectedItem)","runId":"post-fix","message":"PhotosPicker selection changed","sessionId":"cbbe69"}
+{"data":{"hasItem":"true"},"sessionId":"cbbe69","message":"PhotosPicker selection changed","runId":"post-fix","timestamp":1788267116848,"location":"ContentView.swift:onChange(selectedItem)","hypothesisId":"H1"}
+{"data":{"hasItem":"false"},"sessionId":"cbbe69","message":"PhotosPicker selection changed","runId":"post-fix","timestamp":1788267118027,"location":"ContentView.swift:onChange(selectedItem)","hypothesisId":"H1"}

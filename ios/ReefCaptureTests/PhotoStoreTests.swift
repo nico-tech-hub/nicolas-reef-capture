@@ -28,12 +28,21 @@ final class PhotoStoreTests: XCTestCase {
     func testSavedObservationStaysPendingWithLocalPath() throws {
         let id = UUID()
         let path = try store.save(makeJPEGData(), id: id)
-        let observation = Observation(id: id, localFilePath: path)
+        let observation = ReefObservation(id: id, localFilePath: path)
 
         XCTAssertEqual(observation.localFilePath, path)
         XCTAssertEqual(observation.uploadStatus, .pending)
         XCTAssertEqual(observation.displayStatus, "PENDING")
         XCTAssertNotNil(store.loadImage(at: path))
+    }
+
+    func testDeleteRemovesLocalFile() throws {
+        let path = try store.save(makeJPEGData(), id: UUID())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+
+        store.delete(at: path)
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: path))
     }
 
     func testJpegDataConvertsRenderableImage() {

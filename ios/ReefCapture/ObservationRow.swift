@@ -3,7 +3,7 @@ import SwiftUI // for SwiftUI types like View, Text, Button, etc.
 /// A row in the list of observations
 struct ObservationRow: View {
 
-    let observation: Observation // the observation
+    let observation: ReefObservation // the observation
     let image: UIImage? // the image
     var onRetry: (() -> Void)? // the action to perform when the retry button is pressed
 

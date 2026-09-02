@@ -3,6 +3,7 @@ import UIKit // for UIKit types like UIView, UIViewController, etc.
 
 /// Copies picked photos into the app sandbox.
 /// The Photos library identifier is NOT the source of truth — our file is.
+/// stored in Documents/observations directory
 struct PhotoStore {
     let directory: URL
 
@@ -34,5 +35,11 @@ struct PhotoStore {
     func jpegData(from rawImageData: Data, quality: CGFloat = 0.8) -> Data? {
         guard let image = UIImage(data: rawImageData) else { return nil }
         return image.jpegData(compressionQuality: quality)
+    }
+
+    /// Removes a local JPEG if it is still on disk.
+    func delete(at path: String) {
+        guard !path.isEmpty else { return }
+        try? FileManager.default.removeItem(atPath: path)
     }
 }
