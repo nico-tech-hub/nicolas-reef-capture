@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { Photo } from '../api';
 
+/// create a component for the photo table
 defineProps<{
   photos: Photo[];
   selectedId?: string;
 }>();
 
+/// create a function to select the photo
 defineEmits<{
   select: [id: string];
 }>();
 </script>
 
+<!-- create a template for the photo table -->
 <template>
   <table>
     <thead>

@@ -11,6 +11,7 @@ const password = ref('password');
 const loginError = ref('');
 const loading = ref(false);
 
+/// create a function to submit the login form
 async function submitLogin() {
   loginError.value = '';
   loading.value = true;
@@ -25,6 +26,7 @@ async function submitLogin() {
 }
 </script>
 
+<!-- create a template for the login view -->
 <template>
   <section class="card login">
     <h2>Scientist login</h2>
@@ -38,7 +40,10 @@ async function submitLogin() {
         <input v-model="password" type="password" autocomplete="current-password" />
       </label>
       <p v-if="loginError" class="error">{{ loginError }}</p>
-      <button type="submit" :disabled="loading">{{ loading ? 'Signing in…' : 'Sign in' }}</button>
+      <button type="submit" 
+            :disabled="loading">
+            {{ loading ? 'Signing in…' : 'Sign in' }}
+      </button>
     </form>
   </section>
 </template>

@@ -6,18 +6,22 @@ import PhotoTable from '../components/PhotoTable.vue';
 import { useAuthStore } from '../stores/auth';
 import { usePhotosStore } from '../stores/photos';
 
+/// create a route for the dashboard
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const photos = usePhotosStore();
 
+/// create a computed property for the selected id
 const selectedId = computed(() => {
   const id = route.params.id;
   return typeof id === 'string' ? id : undefined;
 });
 
+/// create a computed property for the selected photo
 const selected = computed(() => photos.photoById(selectedId.value));
 
+/// create a function to select the photo
 function selectPhoto(id: string) {
   if (id === selectedId.value) {
     return;
@@ -25,24 +29,28 @@ function selectPhoto(id: string) {
   void router.push(`/photos/${id}`);
 }
 
+/// create a function to approve the photo
 function approve() {
   if (selected.value) {
     void photos.validate(selected.value, true);
   }
 }
 
+/// create a function to reject the photo
 function reject() {
   if (selected.value) {
     void photos.validate(selected.value, false);
   }
 }
 
+/// create a function to retry the photo
 function retry() {
   if (selected.value) {
     void photos.retry(selected.value);
   }
 }
 
+/// create a function to ensure the selection
 function ensureSelection() {
   const current = selectedId.value;
   const list = photos.photos;
@@ -58,6 +66,7 @@ function ensureSelection() {
   }
 }
 
+/// create a function to refresh the photos
 onMounted(async () => {
   try {
     await photos.refresh();
@@ -69,6 +78,7 @@ onMounted(async () => {
   }
 });
 
+/// create a watch to ensure the selection
 watch(
   () => photos.photos,
   () => {

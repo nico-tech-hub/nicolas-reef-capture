@@ -74,7 +74,7 @@ export class PhotosService implements OnModuleDestroy {
       }
     }
 
-    if (!file) { // if the file is not provided, throw a BadRequestException
+    if (!file || !file.buffer?.length) { // if the file is not provided or empty, throw a BadRequestException
       throw new BadRequestException('file is required');
     }
 

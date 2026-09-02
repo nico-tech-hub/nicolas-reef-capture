@@ -2,20 +2,30 @@ import XCTest
 import SwiftData
 @testable import ReefCapture
 
-final class ScriptedPhotoAPI: PhotoUploading {
-    private var stubs: [Result<UploadResponse, Error>]
+/// Scripted API for tests. Value type so `PhotoUploading: Sendable` does not see a mutable class field.
+struct ScriptedPhotoAPI: PhotoUploading {
+    private final class Storage: @unchecked Sendable {
+        var stubs: [Result<UploadResponse, Error>]
+        init(_ stubs: [Result<UploadResponse, Error>]) {
+            self.stubs = stubs
+        }
+    }
+
+    private let storage: Storage
     private let jobStatus: String
 
+    /// create a function to initialize the scripted photo API
     init(_ stubs: Result<UploadResponse, Error>..., jobStatus: String = "COMPLETED") {
-        self.stubs = Array(stubs)
+        self.storage = Storage(Array(stubs))
         self.jobStatus = jobStatus
     }
 
+    /// create a function to upload the photo
     func uploadPhoto(filePath: String, idempotencyKey: UUID) async throws -> UploadResponse {
-        guard !stubs.isEmpty else {
+        guard !storage.stubs.isEmpty else {
             throw UploadError.network
         }
-        return try stubs.removeFirst().get()
+        return try storage.stubs.removeFirst().get()
     }
 
     func fetchJobStatus(jobId: String) async throws -> JobStatus {
@@ -25,11 +35,13 @@ final class ScriptedPhotoAPI: PhotoUploading {
     func deletePhoto(serverId: String) async throws {}
 }
 
+/// tests for the UploadQueue, using XCTest
 @MainActor
 final class UploadQueueTests: XCTestCase {
     private var container: ModelContainer!
     private var context: ModelContext!
 
+/// create a function to set up the test
     override func setUpWithError() throws {
         let schema = Schema([ReefObservation.self])
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -37,6 +49,7 @@ final class UploadQueueTests: XCTestCase {
         context = ModelContext(container)
     }
 
+    /// TEST 1 - test that the queue processes a pending observation
     func testQueueProcessesPendingObservation() async throws {
         let observation = ReefObservation(localFilePath: "/tmp/coral.jpg")
         context.insert(observation)
@@ -55,6 +68,7 @@ final class UploadQueueTests: XCTestCase {
         XCTAssertEqual(observation.retryCount, 0)
     }
 
+    /// TEST 2 - test that the queue marks processing before job completes
     func testQueueMarksProcessingBeforeJobCompletes() async throws {
         let observation = ReefObservation(localFilePath: "/tmp/coral.jpg")
         context.insert(observation)
@@ -74,6 +88,7 @@ final class UploadQueueTests: XCTestCase {
         XCTAssertEqual(observation.jobId, "job-ok")
     }
 
+    /// TEST 3 - test that a failed upload can be retried without duplicating
     func testFailedUploadCanBeRetriedWithoutDuplicating() async throws {
         let observation = ReefObservation(localFilePath: "/tmp/coral.jpg")
         let originalKey = observation.idempotencyKey
@@ -102,6 +117,7 @@ final class UploadQueueTests: XCTestCase {
         XCTAssertEqual(try context.fetch(FetchDescriptor<ReefObservation>()).count, 1)
     }
 
+    /// TEST 4 - test that an interrupted upload is recovered and then uploaded
     func testInterruptedUploadingIsRecoveredThenUploaded() async throws {
         let observation = ReefObservation(localFilePath: "/tmp/coral.jpg")
         observation.uploadStatus = .uploading

@@ -1,7 +1,11 @@
 import XCTest
 @testable import ReefCapture
 
+/// tests for the ReefCaptureAPI, using XCTest
+@MainActor
 final class ReefCaptureAPITests: XCTestCase {
+
+    /// TEST 1 - test that the photo upload JSON maps to the upload response
     func testMapsPhotoUploadJSONToUploadResponse() throws {
         let json = """
         {"photoId":"photo-1","jobId":"job-1","status":"PROCESSING"}
@@ -13,6 +17,7 @@ final class ReefCaptureAPITests: XCTestCase {
         XCTAssertEqual(response.jobId, "job-1")
     }
 
+    /// TEST 2 - test that the job JSON maps to the job status
     func testMapsJobJSONToJobStatus() throws {
         let json = """
         {"jobId":"job-1","photoId":"photo-1","status":"COMPLETED","classification":"healthy_coral","confidence":0.92}

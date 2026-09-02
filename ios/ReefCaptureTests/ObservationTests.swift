@@ -3,6 +3,7 @@ import SwiftData // provides the SwiftData framework for the tests
 @testable import ReefCapture // provides the ReefCapture framework for the tests
 
 /// tests for the Observation model, using SwiftData
+@MainActor
 final class ObservationTests: XCTestCase { 
 
     /// TEST 1 - test that the observation starts as pending

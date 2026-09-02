@@ -2,21 +2,26 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { photoFileUrl, type Photo } from '../api';
 
+/// create a component for the photo detail
 const props = defineProps<{
   photo: Photo;
   conflictMessage: string;
   actionError: string;
 }>();
 
+/// create a function to emit the approve event
 defineEmits<{
   approve: [];
   reject: [];
   retry: [];
 }>();
 
+/// create a variable to store the image URL
 const imageUrl = ref<string | null>(null);
+/// create a computed property for the processing status
 const isProcessing = computed(() => props.photo.processingStatus === 'PROCESSING');
 
+/// create a function to format the confidence
 function percent(confidence: number | null): string {
   if (confidence == null) {
     return '—';
@@ -24,6 +29,7 @@ function percent(confidence: number | null): string {
   return `${Math.round(confidence * 100)}%`;
 }
 
+/// create a watch to update the image URL
 watch(
   () => props.photo.id,
   async (id, _, onCleanup) => {
@@ -31,15 +37,20 @@ watch(
       URL.revokeObjectURL(imageUrl.value);
       imageUrl.value = null;
     }
-    const url = await photoFileUrl(id);
-    imageUrl.value = url;
-    onCleanup(() => {
-      URL.revokeObjectURL(url);
-    });
+    try {
+      const url = await photoFileUrl(id);
+      imageUrl.value = url;
+      onCleanup(() => {
+        URL.revokeObjectURL(url);
+      });
+    } catch {
+      imageUrl.value = null;
+    }
   },
   { immediate: true },
 );
 
+/// create a function to revoke the image URL
 onBeforeUnmount(() => {
   if (imageUrl.value) {
     URL.revokeObjectURL(imageUrl.value);
@@ -47,6 +58,7 @@ onBeforeUnmount(() => {
 });
 </script>
 
+<!-- create a template for the photo detail -->
 <template>
   <section class="card detail">
     <h2>Selected photo</h2>

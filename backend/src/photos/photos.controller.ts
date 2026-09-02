@@ -5,6 +5,7 @@ import {
   Get,
   Headers,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Req,
@@ -14,7 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'fs';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/auth.service';
@@ -58,6 +59,13 @@ export class PhotosController {
   @Get(':id/file')
   file(@Param('id') id: string) {
     const photo = this.photosService.getOrThrow(id); // get the photo from the database
+    if (!existsSync(photo.file_path) || statSync(photo.file_path).size < 2) {
+      throw new NotFoundException('Photo file not found');
+    }
+    const soi = readFileSync(photo.file_path).subarray(0, 2);
+    if (soi[0] !== 0xff || soi[1] !== 0xd8) {
+      throw new NotFoundException('Photo file not found');
+    }
     return new StreamableFile(createReadStream(photo.file_path), { // create a streamable file from the photo file path
       type: 'image/jpeg', // set the content type to image/jpeg
       disposition: `inline; filename="${photo.original_name}"`, // set the disposition to inline and the filename to the original name of the photo

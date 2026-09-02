@@ -39,3 +39,5 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reefcapture.tests
         GENERATE_INFOPLIST_FILE: YES
+        # XCTestCase is nonisolated ObjC; default MainActor isolation breaks inits/setUp overrides.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
