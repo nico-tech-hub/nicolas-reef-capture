@@ -143,30 +143,32 @@ final class UploadQueue {
 
     /// Polls GET /jobs/:id without blocking the upload queue or the UI.
     private func pollJob(id: UUID, jobId: String) async {
-        for attempt in 0..<20 {
-            if attempt > 0 {
+        for attempt in 0..<20 { // repeat the process until the attempt is greater than 20
+            if attempt > 0 { // if the attempt is greater than 0, sleep for the poll interval
                 try? await Task.sleep(nanoseconds: pollIntervalNanoseconds)
             }
-            guard observation(id: id) != nil else { return }
-            guard let job = try? await api.fetchJobStatus(jobId: jobId) else {
-                continue
+            guard observation(id: id) != nil else { return } // if the observation is not found, return
+            guard let job = try? await api.fetchJobStatus(jobId: jobId) else { // try to fetch the job status from the API
+                continue // continue the process if the job status is not found
             }
-            guard let current = observation(id: id) else { return }
-            if job.status == "COMPLETED" {
-                current.processingStatus = .completed
-                try? modelContext.save()
+            guard let current = observation(id: id) else { return } // if the observation is not found, return
+            if job.status == "COMPLETED" { // if the job status is completed, set the processing status to completed
+                current.processingStatus = .completed // set the processing status to completed
+                try? modelContext.save() // save the mutated observation to the model context
                 return
             }
-            if job.status == "FAILED" {
-                current.processingStatus = .failed
-                try? modelContext.save()
+            if job.status == "FAILED" { // if the job status is failed, set the processing status to failed
+                current.processingStatus = .failed // set the processing status to failed
+                try? modelContext.save() // save the mutated observation to the model context
                 return
             }
         }
     }
 
+/// OBSERVATION - get the observation by id
+/// return the observation by id
     private func observation(id: UUID) -> ReefObservation? {
-        let all = (try? modelContext.fetch(FetchDescriptor<ReefObservation>())) ?? []
+        let all = (try? modelContext.fetch(FetchDescriptor<ReefObservation>())) ?? [] // fetch the observations
         return all.first { $0.id == id }
     }
 }

@@ -42,7 +42,14 @@ ReefCapture/
 ├── ios/        iPhone app (SwiftUI, SwiftData, iOS 17+)
 ├── backend/    NestJS API + SQLite
 └── web/        Scientist dashboard (Vue 3 + Vite)
+    ├── src/api.ts              HTTP only
+    ├── src/stores/             Pinia (auth, photos)
+    ├── src/router/             /login, /photos, /photos/:id
+    ├── src/views/              LoginView, DashboardView
+    └── src/components/         PhotoTable, PhotoDetail
 ```
+
+The Vue app is a small official stack: **View → Store → API**. Components do not call `fetch`. Two routes plus `:id` so a refresh keeps the selected photo. No extra layers.
 
 ## Demo accounts
 
@@ -82,7 +89,7 @@ npm install
 npm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Vite proxies `/auth`, `/photos`, and `/jobs` to the API.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173) (redirects to `/photos` or `/login`). Vite proxies `/auth`, `/photos`, and `/jobs` to the API.
 
 Sign in with `scientist@example.com` / `password`.
 

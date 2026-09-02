@@ -2,3 +2,5 @@
 {"data":{"hasItem":"false"},"hypothesisId":"H1","timestamp":1788266945540,"location":"ContentView.swift:onChange(selectedItem)","runId":"post-fix","message":"PhotosPicker selection changed","sessionId":"cbbe69"}
 {"data":{"hasItem":"true"},"sessionId":"cbbe69","message":"PhotosPicker selection changed","runId":"post-fix","timestamp":1788267116848,"location":"ContentView.swift:onChange(selectedItem)","hypothesisId":"H1"}
 {"data":{"hasItem":"false"},"sessionId":"cbbe69","message":"PhotosPicker selection changed","runId":"post-fix","timestamp":1788267118027,"location":"ContentView.swift:onChange(selectedItem)","hypothesisId":"H1"}
+{"runId":"post-fix","timestamp":1788338960172,"hypothesisId":"H2","sessionId":"cbbe69","message":"UploadQueue created with PhotoUploading","location":"ContentView.swift:ensureQueue","data":{"apiType":"ReefCaptureAPI"}}
+{"timestamp":1788338960172,"hypothesisId":"H1","message":"ContentView appeared after build","location":"ContentView.swift:onAppear","sessionId":"cbbe69","runId":"post-fix","data":{"apiType":"ReefCaptureAPI"}}

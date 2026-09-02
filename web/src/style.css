@@ -11,3 +11,179 @@
 body {
   margin: 0;
 }
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: #3d7a86;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 650;
+}
+
+h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #d5e3e7;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card-head,
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.card-head {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.login form {
+  display: grid;
+  gap: 12px;
+  max-width: 360px;
+  margin-top: 16px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+input {
+  padding: 10px 12px;
+  border: 1px solid #c5d5da;
+  border-radius: 8px;
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #0f6e7a;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+button.ghost {
+  background: #e7f1f3;
+  color: #0f6e7a;
+}
+
+button.danger {
+  background: #9b3a3a;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #e6eef0;
+  font-size: 14px;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr.selected {
+  background: #e8f5f7;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  margin: 16px 0;
+}
+
+img,
+.photo-fallback {
+  width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #d9e6ea;
+}
+
+.photo-fallback {
+  display: grid;
+  place-items: center;
+  color: #5b737a;
+}
+
+dl {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+dt {
+  font-size: 12px;
+  color: #5b737a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+dd {
+  margin: 4px 0 0;
+  font-size: 18px;
+}
+
+.muted,
+.error {
+  font-size: 14px;
+}
+
+.muted {
+  color: #5b737a;
+}
+
+.error {
+  color: #9b3a3a;
+}
+
+@media (max-width: 700px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
